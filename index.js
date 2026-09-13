@@ -14,6 +14,15 @@ app.use(cors({ origin: true, credentials: true }));
 
 const httpServer = createServer(app);
 
+// Evita conexiones colgadas / acumulación de listeners por keep-alive
+httpServer.keepAliveTimeout = 5000;
+httpServer.headersTimeout = 6000;
+
+// Red de seguridad adicional por si algo más sube el conteo de listeners
+httpServer.on('connection', (socket) => {
+  socket.setMaxListeners(25);
+});
+
 const io = new Server(httpServer, {
   cors: { origin: true, credentials: true },
 });
@@ -47,6 +56,13 @@ app.get('/', (req, res) => {
 
 app.post('/emit/payment', [validateHeaders], emitUserId('payment'));
 app.post('/emit/logout', [validateHeaders], emitUserId('logout'));
+
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.parse.failed' || err instanceof SyntaxError) {
+    return res.status(400).json({ error: 'JSON inválido' });
+  }
+  next(err);
+});
 
 httpServer.listen(port, '0.0.0.0', () => {
   console.log('Servidor corriendo Puerto: ' + port);
