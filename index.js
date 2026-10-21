@@ -4,7 +4,7 @@ const cors = require('cors');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 
-const port = 8080;
+const port = Number(process.env.PORT || 8081);
 const SOCKET_SECRET = process.env.SOCKET_SECRET;
 
 const app = express();
@@ -62,6 +62,11 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ error: 'JSON inválido' });
   }
   next(err);
+});
+
+httpServer.on('error', (error) => {
+  console.error(`No se pudo iniciar el servidor de sockets en el puerto ${port}: ${error.code}`);
+  process.exit(1);
 });
 
 httpServer.listen(port, '0.0.0.0', () => {
