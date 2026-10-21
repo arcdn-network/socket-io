@@ -4,7 +4,7 @@ const cors = require('cors');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 
-const port = Number(process.env.PORT || 8081);
+const port = Number(process.env.PORT || 8080);
 const SOCKET_SECRET = process.env.SOCKET_SECRET;
 
 const app = express();
